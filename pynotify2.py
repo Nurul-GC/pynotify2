@@ -17,6 +17,11 @@ dbus_obj = bus.get_object('org.freedesktop.Notifications',
 EXPIRES_DEFAULT = -1
 EXPIRES_NEVER = 0
 
+URGENCY_LOW = 0
+URGENCY_NORMAL = 1
+URGENCY_CRITICAL = 2
+urgency_levels = [URGENCY_LOW, URGENCY_NORMAL, URGENCY_CRITICAL]
+
 # Initialise the module (following pynotify's API) -----------------------------
 
 _initted = False
@@ -67,15 +72,18 @@ class Notification(object):
         self.summary = summary
         self.message = message
         self.icon = icon
+        self.hints = {}
     
     def show(self):
+        """Show the notification.
+        """
         self.id = dbus_obj.Notify(appname,       # app_name       (spec names)
                                   0,             # replaces_id
                                   self.icon,     # app_icon
                                   self.summary,  # summary
                                   self.message,  # body
                                   [],            # actions
-                                  {},            # hints
+                                  self.hints,    # hints
                                   -1,            # expire_timeout
                                   dbus_interface='org.freedesktop.Notifications')
     
@@ -83,4 +91,27 @@ class Notification(object):
         if self.id is not None:
             dbus_obj.CloseNotification(self.id,
                                 dbus_interface='org.freedesktop.Notifications')
+    
+    def set_hint(self, key, value):
+        """n.set_hint(key, value) <--> n.hints[key] = value
+        
+        Only exists for compatibility with pynotify.
+        """
+        self.hints[key] = value
+    
+    set_hint_string = set_hint_int32 = set_hint_double = set_hint
+    
+    def set_hint_byte(self, key, value):
+        """Set a hint with a dbus byte value. The input value can be an
+        integer or a bytes string of length 1.
+        """
+        self.hints[key] = dbus.Byte(value)
+    
+    def set_urgency(self, level):
+        """Set the urgency level to one of URGENCY_LOW, URGENCY_NORMAL or
+        URGENCY_CRITICAL.
+        """
+        if level not in urgency_levels:
+            raise ValueError("Unknown urgency level specified", level)
+        self.set_hint_byte("urgency", level)
                            
