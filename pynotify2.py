@@ -66,7 +66,7 @@ def get_server_info():
 # Controlling notifications ----------------------------------------------------
 
 class Notification(object):
-    id = None
+    id = 0
     
     def __init__(self, summary, message='', icon=''):
         self.summary = summary
@@ -78,7 +78,7 @@ class Notification(object):
         """Show the notification.
         """
         self.id = dbus_obj.Notify(appname,       # app_name       (spec names)
-                                  0,             # replaces_id
+                                  self.id,       # replaces_id
                                   self.icon,     # app_icon
                                   self.summary,  # summary
                                   self.message,  # body
@@ -87,8 +87,14 @@ class Notification(object):
                                   -1,            # expire_timeout
                                   dbus_interface='org.freedesktop.Notifications')
     
+    def update(self, summary, message="", icon=None):
+        self.summary = summary
+        self.message = message
+        if icon is not None:
+            self.icon = icon
+    
     def close(self):
-        if self.id is not None:
+        if self.id != 0:
             dbus_obj.CloseNotification(self.id,
                                 dbus_interface='org.freedesktop.Notifications')
     
