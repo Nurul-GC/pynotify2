@@ -24,20 +24,21 @@ urgency_levels = [URGENCY_LOW, URGENCY_NORMAL, URGENCY_CRITICAL]
 
 # Initialise the module (following pynotify's API) -----------------------------
 
-_initted = False
+initted = False
 appname = ""
 
 def init(app_name):
     """Set appname. Only exists for compatibility with pynotify.
     """
+    global appname, initted
     appname = app_name
-    _initted = True
+    initted = True
     return True
 
 def is_initted():
     """Has init() been called? Only exists for compatibility with pynotify.
     """
-    return _initted
+    return initted
 
 def get_app_name():
     """Return appname. Only exists for compatibility with pynotify.
@@ -46,7 +47,8 @@ def get_app_name():
 
 def uninit():
     """Only exists for compatibility with pynotify."""
-    _initted = False
+    global initted
+    initted = False
 
 # Retrieve basic server information --------------------------------------------
 
