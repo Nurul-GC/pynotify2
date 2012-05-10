@@ -83,6 +83,14 @@ def get_server_info():
              'spec-version': str(res[3]),
             }
 
+# Action callbacks -------------------------------------------------------------
+
+notifications_registry = {}
+
+def _action_callback(nid, action)
+    n = notifications_registry[nid]
+    n._action_callback(action)
+
 # Controlling notifications ----------------------------------------------------
 
 class Notification(object):
@@ -94,6 +102,7 @@ class Notification(object):
         self.icon = icon
         self.hints = {}
         self.timeout = -1    # -1 = server default settings
+        self.actions = {}
     
     def show(self):
         """Ask the server to show the notification.
@@ -103,10 +112,11 @@ class Notification(object):
                                   self.icon,     # app_icon
                                   self.summary,  # summary
                                   self.message,  # body
-                                  [],            # actions
+                                  self._make_actions_array(),  # actions
                                   self.hints,    # hints
                                   self.timeout,  # expire_timeout
                                   dbus_interface='org.freedesktop.Notifications')
+        notifications_registry[id] = self
     
     def update(self, summary, message="", icon=None):
         """Replace the summary and body of the notification, and optionally its
@@ -172,4 +182,22 @@ class Notification(object):
         timeout attribute directly.
         """
         return self.timeout
-                           
+    
+    def add_action(self, action, label, callback, user_data=None):
+        self.actions[action] = (label, callback, user_data)
+    
+    def _make_actions_array(self):
+        """Make the actions array to send over DBus.
+        """
+        arr = []
+        for action, (label, callback, user_data) in self.actions.items():
+            arr.append(action)
+            arr.append(label)
+        return arr
+    
+    def _action_callback(self, action):
+        label, callback, user_data = self.actions[action]
+        if user_data is None:
+            callback(self, action)
+        else:
+            callback(self, action, user_data)
