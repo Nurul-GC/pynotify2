@@ -8,11 +8,6 @@ http://developer.gnome.org/notification-spec/
 
 import dbus
 
-bus = dbus.SessionBus()
-
-dbus_obj = bus.get_object('org.freedesktop.Notifications',
-                          '/org/freedesktop/Notifications')
-
 # Constants
 EXPIRES_DEFAULT = -1
 EXPIRES_NEVER = 0
@@ -27,10 +22,30 @@ urgency_levels = [URGENCY_LOW, URGENCY_NORMAL, URGENCY_CRITICAL]
 initted = False
 appname = ""
 
-def init(app_name):
-    """Set appname. Only exists for compatibility with pynotify.
+class UninittedError(RuntimeError):
+    pass
+
+class UninittedDbusObj(object):
+    def __getattr__(self, name):
+        raise UninittedError("You must call notify2.init() before using the "
+                             "notification features.")
+        
+dbus_obj = UninittedDbusObj()
+
+def init(app_name, mainloop=None):
+    """Initialise the Dbus connection.
+    
+    mainloop is an optional DBus compatible mainloop, an instance of
+    dbus.mainloop.glib.DBusGMainLoop or dbus.mainloop.qt.DBusQtMainLoop.
+    Alternatively, instantiate either of these with ``set_as_default=True``
+    before calling this function, then there is no need to pass them.
     """
-    global appname, initted
+    global appname, initted, dbus_obj
+    
+    bus = dbus.SessionBus(mainloop=mainloop)
+
+    dbus_obj = bus.get_object('org.freedesktop.Notifications',
+                              '/org/freedesktop/Notifications')
     appname = app_name
     initted = True
     return True
@@ -46,9 +61,10 @@ def get_app_name():
     return appname
 
 def uninit():
-    """Only exists for compatibility with pynotify."""
-    global initted
+    """Undo what init() does."""
+    global initted, dbus_obj
     initted = False
+    dbus_obj = UninittedDbusObj()
 
 # Retrieve basic server information --------------------------------------------
 

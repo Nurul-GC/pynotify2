@@ -12,9 +12,10 @@ import notify2
 class ModuleTests(unittest.TestCase):
     """Test module level functions.
     """
-    def test_init_uninit(self):
+    def setUp(self):
         notify2.init("notify2 test suite")
-        
+    
+    def test_init_uninit(self):
         assert notify2.is_initted()
         self.assertEqual(notify2.get_app_name(), "notify2 test suite")
         
