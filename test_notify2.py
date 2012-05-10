@@ -29,5 +29,55 @@ class ModuleTests(unittest.TestCase):
         r = notify2.get_server_caps()
         assert isinstance(r, list), type(r)
 
+class NotificationTests(unittest.TestCase):
+    """Test notifications.
+    """
+    def setUp(self):
+        notify2.init("notify2 test suite")
+    
+    def test_basic(self):
+        n = notify2.Notification("Title", "Body text")
+        n.show()
+        n.close()
+    
+    def test_icon(self):
+        n = notify2.Notification("MLK", "I have a dream", "notification-message-im")
+        n.show()
+        n.close()
+    
+    def test_icon_only(self):
+        if 'x-canonical-private-icon-only' in notify2.get_server_caps():
+            n = notify2.Notification ("", # for a11y-reasons put something meaningfull here
+                                      "", # for a11y-reasons put something meaningfull here
+                                      "notification-device-eject")
+            n.set_hint_string ("x-canonical-private-icon-only", "true");
+            n.show ()
+    
+    def test_urgency(self):
+        nl = notify2.Notification("Low", "Who cares?")
+        nl.set_urgency(notify2.URGENCY_LOW)
+        nl.show()
+        
+        nn = notify2.Notification("Normal", "Some information")
+        nn.set_urgency(notify2.URGENCY_NORMAL)
+        nn.show()
+        
+        nu = notify2.Notification("Urgent", "Vital information!")
+        nu.set_urgency(notify2.URGENCY_CRITICAL)
+        nu.show()
+    
+    def test_update(self):
+        n = notify2.Notification("First message", "Some text", "notification-message-im")
+        n.show()
+        
+        # The icon should stay the same with this
+        n.update("Second message", "Some more text")
+        n.show()
+        
+        # But this should replace the icon
+        n.update("Third message", "Yet more text, new icon.", "notification-message-email")
+        n.show()
+    
+
 if __name__ == "__main__":
     unittest.main()
