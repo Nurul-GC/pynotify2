@@ -78,6 +78,20 @@ class NotificationTests(unittest.TestCase):
         n.update("Third message", "Yet more text, new icon.", "notification-message-email")
         n.show()
     
+    def test_category(self):
+        n = notify2.Notification("Plain")
+        n.set_category('im.received')
+        n.show()
+    
+    def test_timeout(self):
+        n = notify2.Notification("Plain")
+        self.assertEqual(n.get_timeout(), notify2.EXPIRES_DEFAULT)
+        n.set_timeout(notify2.EXPIRES_NEVER)
+        self.assertEqual(n.get_timeout(), notify2.EXPIRES_NEVER)
+        n.set_timeout(5000)
+        self.assertEqual(n.get_timeout(), 5000)
+        n.show()
+    
 
 if __name__ == "__main__":
     unittest.main()

@@ -75,6 +75,7 @@ class Notification(object):
         self.message = message
         self.icon = icon
         self.hints = {}
+        self.timeout = -1    # -1 = server default settings
     
     def show(self):
         """Show the notification.
@@ -86,7 +87,7 @@ class Notification(object):
                                   self.message,  # body
                                   [],            # actions
                                   self.hints,    # hints
-                                  -1,            # expire_timeout
+                                  self.timeout,  # expire_timeout
                                   dbus_interface='org.freedesktop.Notifications')
     
     def update(self, summary, message="", icon=None):
@@ -122,4 +123,27 @@ class Notification(object):
         if level not in urgency_levels:
             raise ValueError("Unknown urgency level specified", level)
         self.set_hint_byte("urgency", level)
+    
+    def set_category(self, category):
+        self.hints['category'] = category
+    
+    def set_timeout(self, timeout):
+        """Set the display duration in milliseconds, or one of the special
+        values EXPIRES_DEFAULT or EXPIRES_NEVER.
+        
+        Only exists for compatibility with pynotify; you can simply set::
+        
+          n.timeout = 5000
+        """
+        if not isinstance(timeout, int):
+            raise TypeError("timeout value was not int", timeout)
+        self.timeout = timeout
+    
+    def get_timeout(self):
+        """Return the timeout value for this notification.
+        
+        Only exists for compatibility with pynotify; you can inspect the
+        timeout attribute directly.
+        """
+        return self.timeout
                            
