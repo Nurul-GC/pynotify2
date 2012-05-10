@@ -74,6 +74,8 @@ def get_server_caps():
     return [str(x) for x in dbus_obj.GetCapabilities()]
 
 def get_server_info():
+    """Get basic information about the server.
+    """
     res = dbus_obj.GetServerInformation()
     return {'name': str(res[0]),
              'vendor': str(res[1]),
@@ -94,7 +96,7 @@ class Notification(object):
         self.timeout = -1    # -1 = server default settings
     
     def show(self):
-        """Show the notification.
+        """Ask the server to show the notification.
         """
         self.id = dbus_obj.Notify(appname,       # app_name       (spec names)
                                   self.id,       # replaces_id
@@ -107,12 +109,18 @@ class Notification(object):
                                   dbus_interface='org.freedesktop.Notifications')
     
     def update(self, summary, message="", icon=None):
+        """Replace the summary and body of the notification, and optionally its
+        icon. You should call show() again after this to display the updated
+        notification.
+        """
         self.summary = summary
         self.message = message
         if icon is not None:
             self.icon = icon
     
     def close(self):
+        """Ask the server to close this notification.
+        """
         if self.id != 0:
             dbus_obj.CloseNotification(self.id,
                                 dbus_interface='org.freedesktop.Notifications')
@@ -141,6 +149,8 @@ class Notification(object):
         self.set_hint_byte("urgency", level)
     
     def set_category(self, category):
+        """Set the 'category' hint for this notification.
+        """
         self.hints['category'] = category
     
     def set_timeout(self, timeout):
