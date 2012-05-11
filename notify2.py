@@ -22,12 +22,12 @@ There are a few differences from pynotify you should be aware of:
 
 - If you need callbacks from notifications, notify2 must know about your event
   loop. The simplest way is to pass 'glib' or 'qt' as the ``mainloop`` parameter
-  to :func:`init`.
+  to ``init``.
 - The methods ``attach_to_widget`` and ``attach_to_status_icon`` are not
   implemented. You can calculate the location you want the notification to
-  appear and call :meth:`Notification.set_location`.
+  appear and call ``Notification``.
 - ``set_property`` and ``get_property`` are not implemented. The summary, body
-  and icon are accessible as attributes of a :class:`Notification` instance.
+  and icon are accessible as attributes of a ``Notification`` instance.
 - Various methods that pynotify Notification instances got from gobject do not
   exist, or only implement part of the functionality.
 
