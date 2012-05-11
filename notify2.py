@@ -2,7 +2,7 @@
 to communicate with the notifications server directly. It's compatible with
 Python 2 and 3, and its callbacks can work with Gtk 3 or Qt 4 applications.
 
-To use it, first call ``notify2.init()``, then create and show notifications::
+To use it, first call ``notify2.init('app name')``, then create and show notifications::
 
     n = notify2.Notification("Summary",
                              "Some body text",
