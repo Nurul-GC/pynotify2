@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import notify2
 from gi.repository import Gtk
@@ -14,16 +15,16 @@ if __name__ == '__main__':
                               "notification-message-email")
 
     if not n.show():
-        print "Failed to send notification"
+        print("Failed to send notification")
         sys.exit(1)
 
     # Image URI
     uri = "file://" + os.path.abspath(os.path.curdir) + "/applet-critical.png"
-    print "Sending " + uri
+    print("Sending", uri)
 
     n = notify2.Notification("Alert!", "Testing URI icons", uri)
     if not n.show():
-        print "Failed to send notification"
+        print("Failed to send notification")
         sys.exit(1)
 
     # Raw image
@@ -34,5 +35,5 @@ if __name__ == '__main__':
     n.set_icon_from_pixbuf(icon)
 
     if not n.show():
-        print "Failed to send notification"
+        print("Failed to send notification")
         sys.exit(1)
