@@ -36,14 +36,26 @@ dbus_obj = UninittedDbusObj()
 def init(app_name, mainloop=None):
     """Initialise the Dbus connection.
     
-    To get callbacks from notifications, DBus must be integrated with a mainloop:
+    To get callbacks from notifications, DBus must be integrated with a mainloop.
+    There are three ways to achieve this:
     
-    mainloop is an optional DBus compatible mainloop, an instance of
-    dbus.mainloop.glib.DBusGMainLoop or dbus.mainloop.qt.DBusQtMainLoop.
-    Alternatively, instantiate either of these with ``set_as_default=True``
-    before calling this function, then there is no need to pass them.
+    - Set a default mainloop (dbus.set_default_main_loop) before calling init()
+    - Pass the mainloop parameter as a string 'glib' or 'qt' to integrate with
+      those mainloops.
+    - Pass the mainloop parameter a DBus compatible mainloop instance, such as
+      dbus.mainloop.glib.DBusGMainLoop().
+    
+    If you only want to display notifications, without receiving information
+    back from them, you can safely omit mainloop.
     """
     global appname, initted, dbus_obj, _have_mainloop
+    
+    if mainloop == 'glib':
+        from dbus.mainloop.glib import DBusGMainLoop
+        mainloop = DBusGMainLoop()
+    elif mainloop == 'qt':
+        from dbus.mainloop.qt import DBusQtMainLoop
+        mainloop = DBusQtMainLoop()
     
     bus = dbus.SessionBus(mainloop=mainloop)
 

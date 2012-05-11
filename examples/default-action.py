@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from gi.repository import Gtk
-from dbus.mainloop.glib import DBusGMainLoop
 import notify2
 import sys
 
@@ -15,7 +14,7 @@ def closed_cb(n):
     Gtk.main_quit()
 
 if __name__ == '__main__':
-    if not notify2.init("Default Action Test", mainloop=DBusGMainLoop()):
+    if not notify2.init("Default Action Test", mainloop='glib'):
         sys.exit(1)
 
     n = notify2.Notification("Matt is online")
