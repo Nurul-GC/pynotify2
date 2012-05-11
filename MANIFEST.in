@@ -1,0 +1,3 @@
+include examples/*.py
+include examples/*.png
+include test_*.py
