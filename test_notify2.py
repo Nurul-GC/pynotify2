@@ -93,6 +93,14 @@ class NotificationTests(unittest.TestCase):
         self.assertEqual(n.get_timeout(), 5000)
         n.show()
     
+    def test_data(self):
+        n = notify2.Notification("Plain")
+        n.data['a'] = 1
+        n.set_data('b', 2)  # pynotify API
+        n.show()
+        self.assertEqual(n.get_data('a'), 1)   # pynotify API
+        self.assertEqual(n.data['b'], 2)
+    
 
 if __name__ == "__main__":
     unittest.main()

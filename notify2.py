@@ -149,6 +149,7 @@ class Notification(object):
         self.icon = icon
         self.hints = {}
         self.actions = {}
+        self.data = {}     # Any data the user wants to attach
     
     def show(self):
         """Ask the server to show the notification.
@@ -279,3 +280,17 @@ class Notification(object):
         if event != 'closed':
             raise ValueError("'closed' is the only valid value for event", event)
         self._closed_callback = callback
+    
+    def set_data(self, key, value):
+        """n.set_data(key, value) <--> n.data[key] = value
+        
+        Only exists for compatibility with pynotify.
+        """
+        self.data[key] = value
+    
+    def get_data(self, key):
+        """n.get_data(key) <--> n.data[key]
+        
+        Only exists for compatibility with pynotify.
+        """
+        return self.data[key]
