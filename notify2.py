@@ -1,8 +1,17 @@
 """This is a pure-python replacement for notify-python, using python-dbus
 to communicate with the notifications server directly.
 
-See the notifications spec at:
+To use it, first call ``notify2.init()``, then create and show notifications::
 
+    n = notify2.Notification("Summary",
+                             "Some body text",
+                             "notification-message-im"   # Icon name
+                            )
+    n.show()
+
+To see more of what's possible, refer to docstrings of methods and objects.
+
+Based on the notifications spec at:
 http://developer.gnome.org/notification-spec/
 """
 
@@ -234,7 +243,7 @@ class Notification(object):
           The text displayed on the action button
         callback : callable
           A function taking at 2-3 parameters: the Notification object, the
-          action key and (if specified), the user_data.
+          action key and (if specified) the user_data.
         user_data :
           An extra argument to pass to the callback.
         """
