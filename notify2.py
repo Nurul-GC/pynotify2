@@ -294,3 +294,18 @@ class Notification(object):
         Only exists for compatibility with pynotify.
         """
         return self.data[key]
+
+    def set_icon_from_pixbuf(self, icon):
+        """Set a custom icon from a GdkPixbuf.
+        """
+        struct = (
+            icon.get_width(),
+            icon.get_height(),
+            icon.get_rowstride(),
+            icon.get_has_alpha(),
+            icon.get_bits_per_sample(),
+            icon.get_n_channels(),
+            dbus.ByteArray(icon.get_pixels())
+            )
+        self.hints['icon_data'] = struct
+        
