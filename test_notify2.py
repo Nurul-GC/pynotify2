@@ -8,6 +8,7 @@ Running this may display several notifications.
 
 import unittest
 import notify2
+from gi.repository import GdkPixbuf
 
 class ModuleTests(unittest.TestCase):
     """Test module level functions.
@@ -101,6 +102,11 @@ class NotificationTests(unittest.TestCase):
         self.assertEqual(n.get_data('a'), 1)   # pynotify API
         self.assertEqual(n.data['b'], 2)
     
+    def test_icon_from_pixbuf(self):
+        pb = GdkPixbuf.Pixbuf.new_from_file("examples/applet-critical.png")
+        n = notify2.Notification("Icon", "Testing icon from pixbuf")
+        n.set_icon_from_pixbuf(pb)
+        n.show()
 
 if __name__ == "__main__":
     unittest.main()
