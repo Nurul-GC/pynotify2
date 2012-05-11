@@ -21,6 +21,7 @@ urgency_levels = [URGENCY_LOW, URGENCY_NORMAL, URGENCY_CRITICAL]
 
 initted = False
 appname = ""
+_have_mainloop = False
 
 class UninittedError(RuntimeError):
     pass
@@ -35,12 +36,14 @@ dbus_obj = UninittedDbusObj()
 def init(app_name, mainloop=None):
     """Initialise the Dbus connection.
     
+    To get callbacks from notifications, DBus must be integrated with a mainloop:
+    
     mainloop is an optional DBus compatible mainloop, an instance of
     dbus.mainloop.glib.DBusGMainLoop or dbus.mainloop.qt.DBusQtMainLoop.
     Alternatively, instantiate either of these with ``set_as_default=True``
     before calling this function, then there is no need to pass them.
     """
-    global appname, initted, dbus_obj
+    global appname, initted, dbus_obj, _have_mainloop
     
     bus = dbus.SessionBus(mainloop=mainloop)
 
@@ -48,6 +51,14 @@ def init(app_name, mainloop=None):
                               '/org/freedesktop/Notifications')
     appname = app_name
     initted = True
+    
+    if mainloop or dbus.get_default_main_loop():
+        _have_mainloop = True
+        dbus_obj.connect_to_signal('ActionInvoked', _action_callback,
+                               dbus_interface='org.freedesktop.Notifications')
+        dbus_obj.connect_to_signal('NotificationClosed', _closed_callback,
+                               dbus_interface='org.freedesktop.Notifications')
+        
     return True
 
 def is_initted():
@@ -62,8 +73,9 @@ def get_app_name():
 
 def uninit():
     """Undo what init() does."""
-    global initted, dbus_obj
+    global initted, dbus_obj, _have_mainloop
     initted = False
+    _have_mainloop = False
     dbus_obj = UninittedDbusObj()
 
 # Retrieve basic server information --------------------------------------------
@@ -87,36 +99,54 @@ def get_server_info():
 
 notifications_registry = {}
 
-def _action_callback(nid, action)
+def _action_callback(nid, action):
+    nid, action = int(nid), str(action)
     n = notifications_registry[nid]
     n._action_callback(action)
+
+def _closed_callback(nid, reason):
+    nid, reason = int(nid), int(reason)
+    n = notifications_registry[nid]
+    n._closed_callback(n)
+    del notifications_registry[nid]
+
+def no_op(*args):
+    """No-op function for callbacks.
+    """
+    pass
 
 # Controlling notifications ----------------------------------------------------
 
 class Notification(object):
     id = 0
+    timeout = -1    # -1 = server default settings
+    _closed_callback = no_op
     
     def __init__(self, summary, message='', icon=''):
         self.summary = summary
         self.message = message
         self.icon = icon
         self.hints = {}
-        self.timeout = -1    # -1 = server default settings
         self.actions = {}
     
     def show(self):
         """Ask the server to show the notification.
         """
-        self.id = dbus_obj.Notify(appname,       # app_name       (spec names)
-                                  self.id,       # replaces_id
-                                  self.icon,     # app_icon
-                                  self.summary,  # summary
-                                  self.message,  # body
-                                  self._make_actions_array(),  # actions
-                                  self.hints,    # hints
-                                  self.timeout,  # expire_timeout
-                                  dbus_interface='org.freedesktop.Notifications')
-        notifications_registry[id] = self
+        nid = dbus_obj.Notify(appname,       # app_name       (spec names)
+                              self.id,       # replaces_id
+                              self.icon,     # app_icon
+                              self.summary,  # summary
+                              self.message,  # body
+                              self._make_actions_array(),  # actions
+                              self.hints,    # hints
+                              self.timeout,  # expire_timeout
+                              dbus_interface='org.freedesktop.Notifications')
+        
+        self.id = int(nid)
+        
+        if _have_mainloop:
+            notifications_registry[self.id] = self
+        return True
     
     def update(self, summary, message="", icon=None):
         """Replace the summary and body of the notification, and optionally its
@@ -184,6 +214,18 @@ class Notification(object):
         return self.timeout
     
     def add_action(self, action, label, callback, user_data=None):
+        """Add an action to the notification (if the server supports it).
+        
+        action : str
+          A brief key.
+        label : str
+          The text displayed on the action button
+        callback : callable
+          A function taking at 2-3 parameters: the Notification object, the
+          action key and (if specified), the user_data.
+        user_data :
+          An extra argument to pass to the callback.
+        """
         self.actions[action] = (label, callback, user_data)
     
     def _make_actions_array(self):
@@ -196,8 +238,23 @@ class Notification(object):
         return arr
     
     def _action_callback(self, action):
-        label, callback, user_data = self.actions[action]
+        """Called when the user selects an action on the notification, to
+        dispatch it to the relevant user-specified callback.
+        """
+        try:
+            label, callback, user_data = self.actions[action]
+        except KeyError:
+            return
+        
         if user_data is None:
             callback(self, action)
         else:
             callback(self, action, user_data)
+    
+    def connect(self, event, callback):
+        """Set the callback for the notification closing; the only valid value
+        for event is 'closed'. The API is compatible with pynotify.
+        """
+        if event != 'closed':
+            raise ValueError("'closed' is the only valid value for event", event)
+        self._closed_callback = callback
