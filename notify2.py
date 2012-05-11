@@ -39,7 +39,7 @@ class UninittedDbusObj(object):
     def __getattr__(self, name):
         raise UninittedError("You must call notify2.init() before using the "
                              "notification features.")
-        
+
 dbus_obj = UninittedDbusObj()
 
 def init(app_name, mainloop=None):
@@ -50,7 +50,8 @@ def init(app_name, mainloop=None):
     
     - Set a default mainloop (dbus.set_default_main_loop) before calling init()
     - Pass the mainloop parameter as a string 'glib' or 'qt' to integrate with
-      those mainloops.
+      those mainloops. (N.B. passing 'qt' currently makes that the default dbus
+      mainloop, because that's the only way it seems to work.)
     - Pass the mainloop parameter a DBus compatible mainloop instance, such as
       dbus.mainloop.glib.DBusGMainLoop().
     
@@ -64,7 +65,10 @@ def init(app_name, mainloop=None):
         mainloop = DBusGMainLoop()
     elif mainloop == 'qt':
         from dbus.mainloop.qt import DBusQtMainLoop
-        mainloop = DBusQtMainLoop()
+        # For some reason, this only works if we make it the default mainloop
+        # for dbus. That might make life tricky for anyone trying to juggle two
+        # event loops, but I can't see any way round it.
+        mainloop = DBusQtMainLoop(set_as_default=True)
     
     bus = dbus.SessionBus(mainloop=mainloop)
 
