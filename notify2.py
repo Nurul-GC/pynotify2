@@ -312,4 +312,12 @@ class Notification(object):
             dbus.ByteArray(icon.get_pixels())
             )
         self.hints['icon_data'] = struct
+    
+    def set_location(self, x, y):
+        """Set the notification location as (x, y), if the server supports it.
+        """
+        if (not isinstance(x, int)) or (not isinstance(y, int)):
+            raise TypeError("x and y must both be ints", (x,y))
+        self.hints['x'] = x
+        self.hints['y'] = y
         

@@ -107,6 +107,11 @@ class NotificationTests(unittest.TestCase):
         n = notify2.Notification("Icon", "Testing icon from pixbuf")
         n.set_icon_from_pixbuf(pb)
         n.show()
+    
+    def test_set_location(self):
+        n = notify2.Notification("Location", "Test setting location")
+        n.set_location(320, 240)
+        n.show()
 
 if __name__ == "__main__":
     unittest.main()
