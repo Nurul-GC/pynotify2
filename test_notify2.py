@@ -59,14 +59,17 @@ class NotificationTests(unittest.TestCase):
         nl = notify2.Notification("Low", "Who cares?")
         nl.set_urgency(notify2.URGENCY_LOW)
         nl.show()
+        nl.close()
         
         nn = notify2.Notification("Normal", "Some information")
         nn.set_urgency(notify2.URGENCY_NORMAL)
         nn.show()
+        nn.close()
         
         nu = notify2.Notification("Urgent", "Vital information!")
         nu.set_urgency(notify2.URGENCY_CRITICAL)
         nu.show()
+        nu.close()
     
     def test_update(self):
         n = notify2.Notification("First message", "Some text", "notification-message-im")
@@ -79,11 +82,13 @@ class NotificationTests(unittest.TestCase):
         # But this should replace the icon
         n.update("Third message", "Yet more text, new icon.", "notification-message-email")
         n.show()
+        n.close()
     
     def test_category(self):
         n = notify2.Notification("Plain")
         n.set_category('im.received')
         n.show()
+        n.close()
     
     def test_timeout(self):
         n = notify2.Notification("Plain")
@@ -93,6 +98,7 @@ class NotificationTests(unittest.TestCase):
         n.set_timeout(5000)
         self.assertEqual(n.get_timeout(), 5000)
         n.show()
+        n.close()
     
     def test_data(self):
         n = notify2.Notification("Plain")
@@ -101,17 +107,20 @@ class NotificationTests(unittest.TestCase):
         n.show()
         self.assertEqual(n.get_data('a'), 1)   # pynotify API
         self.assertEqual(n.data['b'], 2)
+        n.close()
     
     def test_icon_from_pixbuf(self):
         pb = GdkPixbuf.Pixbuf.new_from_file("examples/applet-critical.png")
         n = notify2.Notification("Icon", "Testing icon from pixbuf")
         n.set_icon_from_pixbuf(pb)
         n.show()
+        n.close()
     
     def test_set_location(self):
         n = notify2.Notification("Location", "Test setting location")
         n.set_location(320, 240)
         n.show()
+        n.close()
 
 if __name__ == "__main__":
     unittest.main()
