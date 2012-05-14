@@ -60,7 +60,7 @@ class UninittedDbusObj(object):
         raise UninittedError("You must call notify2.init() before using the "
                              "notification features.")
 
-dbus_obj = UninittedDbusObj()
+dbus_iface = UninittedDbusObj()
 
 def init(app_name, mainloop=None):
     """Initialise the Dbus connection.
@@ -78,7 +78,7 @@ def init(app_name, mainloop=None):
     If you only want to display notifications, without receiving information
     back from them, you can safely omit mainloop.
     """
-    global appname, initted, dbus_obj, _have_mainloop
+    global appname, initted, dbus_iface, _have_mainloop
     
     if mainloop == 'glib':
         from dbus.mainloop.glib import DBusGMainLoop
@@ -94,15 +94,15 @@ def init(app_name, mainloop=None):
 
     dbus_obj = bus.get_object('org.freedesktop.Notifications',
                               '/org/freedesktop/Notifications')
+    dbus_iface = dbus.Interface(dbus_obj,
+                                dbus_interface='org.freedesktop.Notifications')
     appname = app_name
     initted = True
     
     if mainloop or dbus.get_default_main_loop():
         _have_mainloop = True
-        dbus_obj.connect_to_signal('ActionInvoked', _action_callback,
-                               dbus_interface='org.freedesktop.Notifications')
-        dbus_obj.connect_to_signal('NotificationClosed', _closed_callback,
-                               dbus_interface='org.freedesktop.Notifications')
+        dbus_iface.connect_to_signal('ActionInvoked', _action_callback)
+        dbus_iface.connect_to_signal('NotificationClosed', _closed_callback)
         
     return True
 
@@ -118,22 +118,22 @@ def get_app_name():
 
 def uninit():
     """Undo what init() does."""
-    global initted, dbus_obj, _have_mainloop
+    global initted, dbus_iface, _have_mainloop
     initted = False
     _have_mainloop = False
-    dbus_obj = UninittedDbusObj()
+    dbus_iface = UninittedDbusObj()
 
 # Retrieve basic server information --------------------------------------------
 
 def get_server_caps():
     """Get a list of server capabilities.
     """
-    return [str(x) for x in dbus_obj.GetCapabilities()]
+    return [str(x) for x in dbus_iface.GetCapabilities()]
 
 def get_server_info():
     """Get basic information about the server.
     """
-    res = dbus_obj.GetServerInformation()
+    res = dbus_iface.GetServerInformation()
     return {'name': str(res[0]),
              'vendor': str(res[1]),
              'version': str(res[2]),
@@ -178,7 +178,7 @@ class Notification(object):
     def show(self):
         """Ask the server to show the notification.
         """
-        nid = dbus_obj.Notify(appname,       # app_name       (spec names)
+        nid = dbus_iface.Notify(appname,       # app_name       (spec names)
                               self.id,       # replaces_id
                               self.icon,     # app_icon
                               self.summary,  # summary
@@ -186,7 +186,7 @@ class Notification(object):
                               self._make_actions_array(),  # actions
                               self.hints,    # hints
                               self.timeout,  # expire_timeout
-                              dbus_interface='org.freedesktop.Notifications')
+                            )
         
         self.id = int(nid)
         
@@ -208,8 +208,7 @@ class Notification(object):
         """Ask the server to close this notification.
         """
         if self.id != 0:
-            dbus_obj.CloseNotification(self.id,
-                                dbus_interface='org.freedesktop.Notifications')
+            dbus_iface.CloseNotification(self.id)
     
     def set_hint(self, key, value):
         """n.set_hint(key, value) <--> n.hints[key] = value
