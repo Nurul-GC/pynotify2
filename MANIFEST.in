@@ -1,3 +1,2 @@
-include examples/*.py
-include examples/*.png
+include examples/*
 include test_*.py
