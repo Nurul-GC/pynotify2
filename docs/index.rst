@@ -39,7 +39,12 @@ Creating and showing notifications
    .. automethod:: update
    
    .. automethod:: close
-   
+
+Extra parameters
+----------------
+
+.. class:: Notification
+
    .. automethod:: set_urgency
    
    .. automethod:: set_timeout

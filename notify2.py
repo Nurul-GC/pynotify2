@@ -187,9 +187,8 @@ class Notification(object):
     icon : str
       Path to an icon image, or the name of a stock icon. Stock icons available
       in Ubuntu are `listed here <https://wiki.ubuntu.com/NotificationDevelopmentGuidelines#How_do_I_get_these_slick_icons>`_.
-    
-    You can also set an icon from data in your application - see
-    :meth:`set_icon_from_pixbuf`.
+      You can also set an icon from data in your application - see
+      :meth:`set_icon_from_pixbuf`.
     """
     id = 0
     timeout = -1    # -1 = server default settings
