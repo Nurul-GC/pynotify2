@@ -145,23 +145,23 @@ def get_server_info():
 notifications_registry = {}
 
 def _action_callback(nid, action):
-    try:
         nid, action = int(nid), str(action)
+    try:
         n = notifications_registry[nid]
-        n._action_callback(action)
     except KeyError:
         #this message was created through some other program.
-        pass
+        return
+    n._action_callback(action)
 
 def _closed_callback(nid, reason):
-    try:
         nid, reason = int(nid), int(reason)
+    try:
         n = notifications_registry[nid]
-        n._closed_callback(n)
-        del notifications_registry[nid]
     except KeyError:
         #this message was created through some other program.
-        pass
+        return
+    n._closed_callback(n)
+    del notifications_registry[nid]
 
 def no_op(*args):
     """No-op function for callbacks.
