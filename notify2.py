@@ -53,6 +53,9 @@ appname = ""
 _have_mainloop = False
 
 class UninittedError(RuntimeError):
+    """Error raised if you try to communicate with the server before calling
+    :func:`init`.
+    """
     pass
 
 class UninittedDbusObj(object):
@@ -63,7 +66,8 @@ class UninittedDbusObj(object):
 dbus_iface = UninittedDbusObj()
 
 def init(app_name, mainloop=None):
-    """Initialise the Dbus connection.
+    """Initialise the D-Bus connection. Must be called before you send any
+    notifications, or retrieve server info or capabilities.
     
     To get callbacks from notifications, DBus must be integrated with a mainloop.
     There are three ways to achieve this:
@@ -127,6 +131,9 @@ def uninit():
 
 def get_server_caps():
     """Get a list of server capabilities.
+    
+    These are short strings, listed `in the spec <http://people.gnome.org/~mccann/docs/notification-spec/notification-spec-latest.html#commands>`_.
+    Vendors may also list extra capabilities with an 'x-' prefix, e.g. 'x-canonical-append'.
     """
     return [str(x) for x in dbus_iface.GetCapabilities()]
 
@@ -171,6 +178,19 @@ def no_op(*args):
 # Controlling notifications ----------------------------------------------------
 
 class Notification(object):
+    """A notification object.
+    
+    summary : str
+      The title text
+    message : str
+      The body text, if the server has the 'body' capability.
+    icon : str
+      Path to an icon image, or the name of a stock icon. Stock icons available
+      in Ubuntu are `listed here <https://wiki.ubuntu.com/NotificationDevelopmentGuidelines#How_do_I_get_these_slick_icons>`_.
+    
+    You can also set an icon from data in your application - see
+    :meth:`set_icon_from_pixbuf`.
+    """
     id = 0
     timeout = -1    # -1 = server default settings
     _closed_callback = no_op
@@ -185,6 +205,9 @@ class Notification(object):
     
     def show(self):
         """Ask the server to show the notification.
+        
+        Call this after you have finished setting any parameters of the
+        notification that you want.
         """
         nid = dbus_iface.Notify(appname,       # app_name       (spec names)
                               self.id,       # replaces_id
@@ -204,8 +227,8 @@ class Notification(object):
     
     def update(self, summary, message="", icon=None):
         """Replace the summary and body of the notification, and optionally its
-        icon. You should call show() again after this to display the updated
-        notification.
+        icon. You should call :meth:`show` again after this to display the
+        updated notification.
         """
         self.summary = summary
         self.message = message
@@ -213,13 +236,14 @@ class Notification(object):
             self.icon = icon
     
     def close(self):
-        """Ask the server to close this notification.
-        """
+        """Ask the server to close this notification."""
         if self.id != 0:
             dbus_iface.CloseNotification(self.id)
     
     def set_hint(self, key, value):
         """n.set_hint(key, value) <--> n.hints[key] = value
+        
+        See `hints in the spec <http://people.gnome.org/~mccann/docs/notification-spec/notification-spec-latest.html#hints>`_.
         
         Only exists for compatibility with pynotify.
         """
@@ -243,12 +267,15 @@ class Notification(object):
     
     def set_category(self, category):
         """Set the 'category' hint for this notification.
+        
+        See `categories in the spec <http://people.gnome.org/~mccann/docs/notification-spec/notification-spec-latest.html#categories>`_.
         """
         self.hints['category'] = category
     
     def set_timeout(self, timeout):
         """Set the display duration in milliseconds, or one of the special
-        values EXPIRES_DEFAULT or EXPIRES_NEVER.
+        values EXPIRES_DEFAULT or EXPIRES_NEVER. This is a request, which the
+        server might ignore.
         
         Only exists for compatibility with pynotify; you can simply set::
         
@@ -267,7 +294,9 @@ class Notification(object):
         return self.timeout
     
     def add_action(self, action, label, callback, user_data=None):
-        """Add an action to the notification (if the server supports it).
+        """Add an action to the notification.
+        
+        Check for the 'actions' server capability before using this.
         
         action : str
           A brief key.
@@ -306,7 +335,9 @@ class Notification(object):
     
     def connect(self, event, callback):
         """Set the callback for the notification closing; the only valid value
-        for event is 'closed'. The API is compatible with pynotify.
+        for event is 'closed' (the parameter is kept for compatibility with pynotify).
+        
+        The callback will be called with the :class:`Notification` instance.
         """
         if event != 'closed':
             raise ValueError("'closed' is the only valid value for event", event)
