@@ -145,7 +145,7 @@ def get_server_info():
 notifications_registry = {}
 
 def _action_callback(nid, action):
-        nid, action = int(nid), str(action)
+    nid, action = int(nid), str(action)
     try:
         n = notifications_registry[nid]
     except KeyError:
@@ -154,7 +154,7 @@ def _action_callback(nid, action):
     n._action_callback(action)
 
 def _closed_callback(nid, reason):
-        nid, reason = int(nid), int(reason)
+    nid, reason = int(nid), int(reason)
     try:
         n = notifications_registry[nid]
     except KeyError:
