@@ -13,6 +13,13 @@
 
 import sys, os
 
+# To get docstrings, we need to be able to import dbus, but we don't need to
+# actually use it.
+try:
+    import dbus
+except ImportError:
+    sys.modules['dbus'] = object()
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.

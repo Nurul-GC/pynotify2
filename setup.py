@@ -1,4 +1,13 @@
 from distutils.core import setup
+
+# To load the docstring, we need to be able to import dbus, but we don't
+# actually use it.
+try:
+    import dbus
+except ImportError:
+    import sys
+    sys.modules['dbus'] = object()
+
 import notify2
 long_description = notify2.__doc__
 
