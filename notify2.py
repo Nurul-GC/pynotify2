@@ -10,7 +10,8 @@ To use it, first call ``notify2.init('app name')``, then create and show notific
                             )
     n.show()
 
-To see more of what's possible, refer to docstrings of methods and objects.
+API docs are `available on ReadTheDocs <https://notify2.readthedocs.org/en/latest/>`_,
+or you can refer to docstrings.
 
 Based on the notifications spec at:
 http://developer.gnome.org/notification-spec/
