@@ -35,6 +35,7 @@ There are a few differences from pynotify you should be aware of:
 Several pynotify functions, especially getters and setters, are only supported
 for compatibility. You are encouraged to use more direct, Pythonic alternatives.
 """
+
 import dbus
 
 # Constants
