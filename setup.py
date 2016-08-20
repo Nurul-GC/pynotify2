@@ -12,7 +12,7 @@ import notify2
 long_description = notify2.__doc__
 
 setup(name='notify2',
-      version='0.3',
+      version='0.3.1',
       description='Python interface to DBus notifications',
       long_description=long_description,
       author='Thomas Kluyver',

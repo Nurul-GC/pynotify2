@@ -35,7 +35,6 @@ There are a few differences from pynotify you should be aware of:
 Several pynotify functions, especially getters and setters, are only supported
 for compatibility. You are encouraged to use more direct, Pythonic alternatives.
 """
-
 import dbus
 
 # Constants
@@ -178,6 +177,14 @@ def no_op(*args):
 
 # Controlling notifications ----------------------------------------------------
 
+ActionsDictClass = dict  # fallback for old version of Python
+try:
+    from collections import OrderedDict
+    ActionsDictClass = OrderedDict
+except ImportError:
+    pass
+
+
 class Notification(object):
     """A notification object.
     
@@ -200,7 +207,7 @@ class Notification(object):
         self.message = message
         self.icon = icon
         self.hints = {}
-        self.actions = {}
+        self.actions = ActionsDictClass()
         self.data = {}     # Any data the user wants to attach
     
     def show(self):
