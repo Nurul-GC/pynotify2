@@ -1,2 +1,4 @@
-include examples/*
+graft examples
+graft docs
 include test_*.py
+include LICENSE
