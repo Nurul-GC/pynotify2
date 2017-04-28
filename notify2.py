@@ -38,6 +38,8 @@ for compatibility. You are encouraged to use more direct, Pythonic alternatives.
 
 import dbus
 
+__version__ = '0.3.1'
+
 # Constants
 EXPIRES_DEFAULT = -1
 EXPIRES_NEVER = 0
