@@ -19,6 +19,9 @@ setup(name='notify2',
       author_email='takowl@gmail.com',
       url='https://bitbucket.org/takluyver/pynotify2',
       py_modules=['notify2'],
+      install_requires=[
+          'dbus-python',
+      ],
       classifiers = [
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
