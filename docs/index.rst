@@ -1,20 +1,25 @@
 notify2 API documentation
 =========================
 
+notify2 is - or was - a package to display desktop notifications on Linux.
+Those are the little bubbles which tell a user about e.g. new emails.
+
+notify2 is *deprecated*. Here are some alternatives:
+
+- `desktop_notify <https://pypi.org/project/desktop-notify/>`_ is a newer module doing essentially the same thing.
+- If you're writing a GTK application, you may want to use GNotification
+  (`intro <https://developer.gnome.org/GNotification/>`__, `Python API <https://lazka.github.io/pgi-docs/#Gio-2.0/classes/Notification.html>`__).
+- For simple cases, you can run ``notify-send`` as a subprocess.
+  The `py-notifier <https://pypi.org/project/py-notifier/>`__ package provides a simple Python API around this, and can also display notifications on Windows.
+
 notify2 is a replacement for pynotify which can be used from different GUI toolkits
 and from programs without a GUI. The API is largely the same as that of pynotify,
 but some less important parts are left out.
 
-You can alternatively use the GObject Introspection bindings to libnotify
-(``from gi.repository import Notify``). I'd recommend that for GTK applications,
-while notify2 has fewer dependencies for non-GTK applications. It should be easy
-to switch between the two.
-
 Notifications are sent to a notification daemon over `D-Bus <http://www.freedesktop.org/wiki/Software/dbus/>`_,
 according to the `Desktop notifications spec <http://people.gnome.org/~mccann/docs/notification-spec/notification-spec-latest.html>`_,
 and the server is responsible for displaying them to the user. So your application
-has limited control over when and how a notification appears. For example,
-Ubuntu uses the `NotifyOSD daemon <https://wiki.ubuntu.com/NotifyOSD>`_.
+has limited control over when and how a notification appears.
 
 .. toctree::
    :maxdepth: 1
